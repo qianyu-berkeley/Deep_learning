@@ -187,5 +187,5 @@ def invert_dropout(A, keep_prob):
     D = np.random.rand(A.shape[0], A.shape[1])
     D = (D < keep_prob).astype(float)
     AD = A * D
-    AD = AD / keep_prob
+    AD = AD / keep_prob  # Normalize
     return AD, D

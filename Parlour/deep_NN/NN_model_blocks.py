@@ -7,11 +7,11 @@ class NN_model_blocks(object):
     def __init__(self, config):
         self.layer_dims = config['layer_dims']  # a list contains the dimension of hidden layers
         self.seed = config['seed']  # random seeds for NN initialization for repeatable results
-        #self.lambd = 0
-        #self.keep_prob = 1
+        self.lambd = config['lambd']
+        self.keep_prob = config['keep_prob']
         self._parameters = {}
 
-    def initialize_parameters_deep(self):
+    def initialize_parameters_deep_xavier(self):
         """
         Initialize deep NN parameters W, b
 
@@ -30,6 +30,31 @@ class NN_model_blocks(object):
         for l in range(1, L):
             self._parameters['W' + str(l)] = np.random.randn(self.layer_dims[l],
                                                              self.layer_dims[l-1])/np.sqrt(self.layer_dims[l-1])
+            self._parameters['b' + str(l)] = np.zeros((self.layer_dims[l], 1))
+
+            assert(self._parameters['W' + str(l)].shape ==
+                   (self.layer_dims[l], self.layer_dims[l-1]))
+            assert(self._parameters['b' + str(l)].shape == (self.layer_dims[l], 1))
+
+    def initialize_parameters_deep_he(self):
+        """
+        Initialize deep NN parameters W, b
+
+        Arguments:
+        ----------
+        layer_dims -- python array (list) containing the dimensions of each layer in our network
+
+        Returns:
+        parameters -- python dictionary containing your parameters "W1", "b1", ..., "WL", "bL":
+                        Wl -- weight matrix of shape (layer_dims[l], layer_dims[l-1])
+                        bl -- bias vector of shape (layer_dims[l], 1)
+        """
+        np.random.seed(self.seed)
+        L = len(self.layer_dims)
+
+        for l in range(1, L):
+            self._parameters['W' + str(l)] = np.random.randn(self.layer_dims[l],
+                                                             self.layer_dims[l-1])*np.sqrt(2.0/self.layer_dims[l-1])
             self._parameters['b' + str(l)] = np.zeros((self.layer_dims[l], 1))
 
             assert(self._parameters['W' + str(l)].shape ==
@@ -77,23 +102,23 @@ class NN_model_blocks(object):
         cache -- a python dictionary containing "linear_cache" and "activation_cache";
                  stored for computing the backward pass efficiently
         """
-        if activation == "sigmoid":
+        if activation == "sigmoid":  # output layer
             Z, linear_cache = self.linear_forward(A_prev, W, b)
             A, activation_cache = utils.sigmoid(Z)
+            assert (A.shape == (W.shape[0], A_prev.shape[1]))
+            dropout_cache = np.ones(A.shape)
+            cache = (linear_cache, activation_cache)
+            return A, cache
 
-        elif activation == "relu":
+        elif activation == "relu":  # hidden layer
             Z, linear_cache = self.linear_forward(A_prev, W, b)
             A, activation_cache = utils.relu(Z)
+            assert (A.shape == (W.shape[0], A_prev.shape[1]))
 
-        # append dropout prob and parameters after dropout to the cache
-        #dropout_cache = utils.invert_dropout(A, self.keep_prob)
-        # cache.append(dropout_cache)
-        # caches.append(cache)
-
-        assert (A.shape == (W.shape[0], A_prev.shape[1]))
-        cache = (linear_cache, activation_cache)
-
-        return A, cache
+            # append dropout prob and parameters with dropout to the cache
+            AD, dropout_cache = utils.invert_dropout(A, self.keep_prob)
+            cache = (linear_cache, activation_cache)
+            return AD, cache, dropout_cache
 
     def L_model_forward(self, X):
         """
@@ -108,32 +133,30 @@ class NN_model_blocks(object):
         """
 
         caches = []
+        dropout_caches = []
         A = X
         L = len(self._parameters) // 2  # number of layers in the neural network
 
         # Implement [LINEAR -> RELU]*(L-1). Add "cache" to the "caches" list.
         for l in range(1, L):
             A_prev = A
-            A, cache = self.linear_activation_forward(
-                A_prev, self._parameters['W' + str(l)],
-                self._parameters['b' + str(l)],
-                activation="relu")
+            A, cache, dropout_cache = self.linear_activation_forward(A_prev,
+                                                                     self._parameters['W' + str(l)],
+                                                                     self._parameters['b' + str(l)],
+                                                                     activation="relu")
             caches.append(cache)
-
-            # append dropout prob and parameters after dropout to the cache
-            #dropout_cache = utils.invert_dropout(A, self.keep_prob)
-            # cache.append(dropout_cache)
+            dropout_caches.append(dropout_cache)
 
         # Implement LINEAR -> SIGMOID. Add "cache" to the "caches" list.
-        AL, cache = self.linear_activation_forward(
-            A, self._parameters['W' + str(L)],
-            self._parameters['b' + str(L)],
-            activation="sigmoid")
+        AL, cache = self.linear_activation_forward(A,
+                                                   self._parameters['W' + str(L)],
+                                                   self._parameters['b' + str(L)],
+                                                   activation="sigmoid")
 
         caches.append(cache)
         assert(AL.shape == (1, X.shape[1]))
 
-        return AL, caches
+        return AL, caches, dropout_caches
 
     def compute_cost(self, AL, Y):
         """
@@ -156,10 +179,10 @@ class NN_model_blocks(object):
         cross_entropy_cost = np.squeeze(cross_entropy_cost)
 
         # L2 Regularization Cost
-        # L2_regularization_cost = sum([np.sum(np.square(w))
-        #                              for w in self._parameters.values()])*self.lambd/(2*m)
+        L2_regularization_cost = sum([np.sum(np.square(w))
+                                      for w in self._parameters.values()])*self.lambd/(2*m)
 
-        cost = cross_entropy_cost  # + L2_regularization_cost
+        cost = cross_entropy_cost + L2_regularization_cost
         assert(cost.shape == ())
 
         return cost
@@ -182,8 +205,7 @@ class NN_model_blocks(object):
         A_prev, W, b = cache
         m = A_prev.shape[1]
 
-        #dW = 1./m * np.dot(dZ, A_prev.T) + (self.lambd/m)*W
-        dW = 1./m * np.dot(dZ, A_prev.T)
+        dW = 1./m * np.dot(dZ, A_prev.T) + (self.lambd/m)*W
         db = 1./m * np.sum(dZ, axis=1, keepdims=True)
         dA_prev = np.dot(W.T, dZ)
 
@@ -193,7 +215,7 @@ class NN_model_blocks(object):
 
         return dA_prev, dW, db
 
-    def linear_activation_backward(self, dA, cache, activation):
+    def linear_activation_backward(self, dA, cache, dropout_cache, activation):
         """
         Implement the backward propagation for the LINEAR->ACTIVATION layer.
 
@@ -209,24 +231,26 @@ class NN_model_blocks(object):
         dW -- Gradient of the cost with respect to W (current layer l), same shape as W
         db -- Gradient of the cost with respect to b (current layer l), same shape as b
         """
-        linear_cache, activation_cache = cache
-        #A, D = dropout_cache
 
         if activation == "relu":
+            linear_cache, activation_cache = cache
             dZ = utils.relu_backward(dA, activation_cache)
             dA_prev, dW, db = self.linear_backward(dZ, linear_cache)
 
         elif activation == "sigmoid":
+            linear_cache, activation_cache = cache
             dZ = utils.sigmoid_backward(dA, activation_cache)
             dA_prev, dW, db = self.linear_backward(dZ, linear_cache)
 
-        # Step 1: Apply mask D2 to shut down the same neurons as during the forward propagation
-        # dA_prev = dA_prev * D2
-        # dA_prev = dA_prev / self.keep_prob
+        # Apply mask D to shut down the same neurons as during the
+        # back propagation
+        D = dropout_cache
+        dA_prev = dA_prev * D
+        dA_prev = dA_prev / self.keep_prob
 
         return dA_prev, dW, db
 
-    def L_model_backward(self, AL, Y, caches):
+    def L_model_backward(self, AL, Y, caches, dropout_caches):
         """
         Implement the backward propagation for the [LINEAR->RELU] * (L-1) -> LINEAR -> SIGMOID group
 
@@ -236,6 +260,8 @@ class NN_model_blocks(object):
         caches -- list of caches containing:
                     every cache of linear_activation_forward() with "relu" (it's caches[l], for l in range(L-1) i.e l = 0...L-2)
                     the cache of linear_activation_forward() with "sigmoid" (it's caches[L-1])
+        dropout_caches -- list of dropout caches containing:
+                    every dropout cache of activation except the final activation where drop out does not apply
 
         Returns:
         grads -- A dictionary with the gradients
@@ -251,20 +277,29 @@ class NN_model_blocks(object):
         dAL = -(np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
 
         # Lth layer (SIGMOID -> LINEAR) gradients.
-        # Inputs: "dAL, current_cache".
+        # Inputs: "dAL, current_cache, None".
         # Outputs: "grads["dAL-1"], grads["dWL"], grads["dbL"]
         current_cache = caches[L-1]
+        current_dropout_cache = dropout_caches[L-2]
         grads["dA" + str(L-1)], grads["dW" + str(L)], grads["db" + str(L)] = \
-            self.linear_activation_backward(dAL, current_cache, 'sigmoid')
+            self.linear_activation_backward(dAL, current_cache, current_dropout_cache, 'sigmoid')
 
         # Loop from l=L-2 to l=0
         for l in reversed(range(L-1)):
             # lth layer: (RELU -> LINEAR) gradients.
-            # Inputs: "grads["dA" + str(l + 1)], current_cache".
+            # Inputs: "grads["dA" + str(l + 1)], current_cache, dropout_cache".
             # Outputs: "grads["dA" + str(l)] , grads["dW" + str(l + 1)] , grads["db" + str(l + 1)]
             current_cache = caches[l]
-            dA_prev_temp, dW_temp, db_temp = self.linear_activation_backward(
-                grads['dA' + str(l+1)], current_cache, 'relu')
+
+            if l == 0:
+                current_dropout_cache = np.ones((1, 1))
+            else:
+                current_dropout_cache = dropout_caches[l - 1]
+
+            dA_prev_temp, dW_temp, db_temp = self.linear_activation_backward(grads['dA' + str(l+1)],
+                                                                             current_cache,
+                                                                             current_dropout_cache,
+                                                                             'relu')
             grads["dA" + str(l)] = dA_prev_temp
             grads["dW" + str(l + 1)] = dW_temp
             grads["db" + str(l + 1)] = db_temp

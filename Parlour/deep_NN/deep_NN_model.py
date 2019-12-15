@@ -9,6 +9,7 @@ class deep_NN_model(object):
         # model parameters default values
         self.learning_rate = 0.01
         self.num_iterations = 2500
+        self.initialization = 'xavier'
         self._config = {}
         self._seed = 1
 
@@ -18,13 +19,15 @@ class deep_NN_model(object):
         # NN model block definition
         self._nn_model_blocks = None
 
-    def set_hyper_params(self, num_iterations, learning_rate, layer_dims):
+    def set_hyper_params(self, num_iterations, learning_rate, initialization,
+                         lambd, keep_prob, layer_dims):
         self.learning_rate = learning_rate
         self.num_iterations = num_iterations
+        self.initialization = initialization
         self._config = {"layer_dims": layer_dims,
-                        "seed": self._seed}
-        # "lambd": lambd,
-        # "keep_prob": keep_prob}
+                        "seed": self._seed,
+                        "lambd": lambd,
+                        "keep_prob": keep_prob}
 
     def L_layer_model(self, train_X, train_Y, print_cost=False):
         """
@@ -39,48 +42,25 @@ class deep_NN_model(object):
         self._nn_model_blocks = NN_model_blocks(self._config)
 
         # Parameters initialization
-        self._nn_model_blocks.initialize_parameters_deep()
+        if self.initialization == 'xavier':
+            self._nn_model_blocks.initialize_parameters_deep_xavier()
+        elif self.initialization == 'he':
+            self._nn_model_blocks.initialize_parameters_deep_he()
 
         # Loop (gradient descent)
         for i in range(0, self.num_iterations):
 
-            AL, caches = self._nn_model_blocks.L_model_forward(train_X)
             # Forward propagation: [LINEAR -> RELU]*(L-1) -> LINEAR -> SIGMOID.
-            # if keep_prob == 1:
-            #    AL, caches = self._nn_model_blocks.L_model_forward(train_X)
-            # elif keep_prob < 1:
-            #    AL, caches = self._nn_model_blocks.L_model_forward(train_X,
-            #                                                       keep_prob)
+            AL, caches, dropout_caches = self._nn_model_blocks.L_model_forward(train_X)
 
-            cost = self._nn_model_blocks.compute_cost(AL, train_Y)
             # Compute cost
-            # if lambd == 0:
-            #    cost = self._nn_model_blocks.compute_cost(AL, train_Y)
-            # else:
-            #    cost = self._nn_model_blocks.compute_cost(AL, train_Y, lambd)
+            cost = self._nn_model_blocks.compute_cost(AL, train_Y)
 
-            # Either user L2 or dropout not both
-            #assert(lambd == 0 or keep_prob == 1)
-
+            # Backward propagation
             grads = self._nn_model_blocks.L_model_backward(AL,
                                                            train_Y,
-                                                           caches)
-
-            # Backward propagation.
-            # if lambd == 0 and keep_prob == 1:
-            #    grads = self._nn_model_blocks.L_model_backward(AL,
-            #                                                  train_Y,
-            #                                                   caches)
-            # elif lambd != 0:
-            #    grads = self._nn_model_blocks.L_model_backward(AL,
-            #                                                   train_Y,
-            #                                                   caches,
-            #                                                   lambd)
-            # elif keep_prob < 1:
-            #    grads = self._nn_model_blocks.L_model_backward(AL,
-            #                                                   train_Y,
-            #                                                   caches,
-            #                                                   keep_prob)
+                                                           caches,
+                                                           dropout_caches)
 
             # Update parameters.
             self._nn_model_blocks.update_parameters(grads,
@@ -112,7 +92,7 @@ class deep_NN_model(object):
         p = np.zeros((1, m))
 
         # Forward propagation
-        probas, caches = self._nn_model_blocks.L_model_forward(X)
+        probas, caches, dropout_caches = self._nn_model_blocks.L_model_forward(X)
 
         # convert probas to 0/1 predictions
         for i in range(0, probas.shape[1]):

@@ -94,6 +94,15 @@ The general methodology to build a Neural Network is to:
    - Iterate between first 2 steps with many iterations
    - In deep learning big data era, we don't always need to balance the trade-off because getting bigger network and get more data will improve without hurting the model (as long as we do proper reguliarzation)
 
+* initialization
+  - The weights $W^{[l]}$ should be initialized randomly to break symmetry.
+  - It is however okay to initialize the biases $b^{[l]}$ to zeros. Symmetry is still broken so long as $W^{[l]}$ is initialized randomly. 
+  - Initializing weights to very large random values does not work well.
+  - Hopefully intializing with small random values does better. The important question is: how small should be these random values be? Lets find out in the next part!
+  - Different initializations lead to different results
+  - Random initialization is used to break symmetry and make sure different hidden units can learn different things
+  - Don't intialize to values that are too large
+  - He initialization works well for networks with ReLU activations.
 
 * Regularization
    - Although L1 in theory will compress the model size to due to its sparsity, but in practice, L1 is less used and less effective. L2 is used much more often in machine learning
@@ -101,7 +110,7 @@ The general methodology to build a Neural Network is to:
    - Intuition, take tanh activatioon, if z is small. Since z = Wa + b, then we are mostly in the linear region, make the overall model more linear, thus prevent overfitting
    - Visual examination of regularization: plot J with regularizaiton term. (cost of gradient decent)
    - Drop out regularization:
-      - Inverted dropout to ensure the expected value of activation stay the same so it will not impact the test prediction
+      - Inverted dropout to ensure the expected value of Activation stay the same so it will not impact the test prediction by normalize parameter after dropout
       - Randomly drop out different hidden unit at different model training iteration
       - No drop out at test time since we are making predict
       - Intuition: do not rely on any single feature, so we spread out the weights by shrink weights similar to L2
