@@ -1,0 +1,18 @@
+{
+  "data_type": "image",
+  "color_scale": 255,
+  "train_data": "./datasets/train_catvnoncat.h5",
+  "test_data": "./datasets/test_catvnoncat.h5",
+  "optimizer_params": {
+      "optimizer":"gd"
+  },
+  "minibatch_size":209,
+  "num_epochs": 2500,
+  "learning_rate": 0.0075,
+  "initialization": "xavier",
+  "seed":1,
+  "lambd": 0,
+  "keep_prob": 1.0,
+  "layer_dims": [4, 5, 5, 1],
+  "verbose": 2
+}

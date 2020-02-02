@@ -1,0 +1,16 @@
+{
+  "data_type": "2D",
+  "data_file_mat": "./datasets/moon_2D_data.mat",
+  "optimizer_params": {
+      "optimizer":"gd"
+  },
+  "minibatch_size": 64,
+  "num_epochs": 10000,
+  "learning_rate": 0.0007,
+  "initialization": "xavier",
+  "lambd": 0.0,
+  "seed":10,
+  "keep_prob": 1.0,
+  "layer_dims": [5, 2, 1],
+  "verbose": 2
+}
