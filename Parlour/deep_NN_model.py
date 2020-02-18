@@ -26,11 +26,12 @@ class deep_NN_model:
         self._nn_model_blocks = None
 
     def set_hyper_params(self, num_epochs, optimizer_params, learning_rate, minibatch_size,
-                         initialization, lambd, keep_prob, layer_dims):
+                         initialization, lambd, keep_prob, layer_dims, seed):
         self.learning_rate = learning_rate
         self.num_epochs = num_epochs
         self.minibatch_size = minibatch_size
         self.initialization = initialization
+        self.seed = seed
         self.optimizer = optimizer_params['optimizer']
         if self.optimizer == "adam":
             self.beta1 = optimizer_params['beta1']

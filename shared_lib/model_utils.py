@@ -51,7 +51,7 @@ def random_mini_batches(X, Y, mini_batch_size=64, seed=0):
 def process_params_file(fp, package):
     params = json.load(fp)
     hyper_params = {}
-    seed = params["seed"]
+    hyper_params['seed'] = params["seed"]
 
     # Data types
     if params['data_type'] == 'image':
@@ -70,14 +70,12 @@ def process_params_file(fp, package):
     hyper_params['initialization'] = params['initialization']
     hyper_params['layer_dims'] = params['layer_dims']
     hyper_params['minibatch_size'] = params['minibatch_size']
-    hyper_params['optimizer_params'] = params['optimizer_params']
     # insert input feature size as the size of first NN layer
     hyper_params['layer_dims'].insert(0, data_dict['train_x'].shape[0])
 
     if package == 'Parlour':
+        hyper_params['optimizer_params'] = params['optimizer_params']
         hyper_params['lambd'] = params['lambd']
         hyper_params['keep_prob'] = params['keep_prob']
-    elif package == 'Vieira':
-        pass
 
-    return data_dict, hyper_params, seed
+    return data_dict, hyper_params

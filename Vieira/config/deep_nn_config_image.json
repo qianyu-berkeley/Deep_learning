@@ -3,9 +3,11 @@
   "color_scale": 255,
   "train_data": "./datasets/train_signs.h5",
   "test_data": "./datasets/test_signs.h5",
+  "initialization": "xavier",
+  "minibatch_size":32,
   "num_epochs": 1500,
   "learning_rate": 0.0001,
-  "initialization": "xavier",
+  "seed":1,
   "layer_dims": [25, 12, 6],
   "verbose": 2
 }

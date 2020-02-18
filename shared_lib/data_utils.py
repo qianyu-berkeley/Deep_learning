@@ -14,7 +14,6 @@ def load_image_data(path_train, path_test, color_scale):
     # image data param size
     num_px = train_x_orig.shape[1]
     color_channel = 3
-    img_param_size = num_px*num_px*color_channel
 
     # load test data
     test_dataset = h5py.File(path_test, "r")
@@ -103,6 +102,11 @@ def load_planar_dataset(sample_size, dimensionality, seed, randomness):
     Y = Y.T
 
     return X, Y
+
+
+def convert_to_one_hot(Y, C):
+    Y = np.eye(C)[Y.reshape(-1)].T
+    return Y
 
 
 def load_2D_dataset(file):
