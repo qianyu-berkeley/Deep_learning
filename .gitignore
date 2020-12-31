@@ -105,3 +105,6 @@ venv.bak/
 
 # mac system files
 .DS_Store
+
+#vim tags
+tags
