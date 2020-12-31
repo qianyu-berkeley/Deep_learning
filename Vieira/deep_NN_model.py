@@ -4,7 +4,6 @@ from shared_lib.model_utils import random_mini_batches
 
 
 class deep_NN_model:
-
     def __init__(self):
         # model parameters default values
         self.learning_rate = 0.01
@@ -23,8 +22,15 @@ class deep_NN_model:
         # object function cost tracker
         self._costs = []
 
-    def set_hyper_params(self, learning_rate, num_epochs, initialization,
-                         minibatch_size, layer_dims, seed):
+    def set_hyper_params(
+        self,
+        learning_rate,
+        num_epochs,
+        initialization,
+        minibatch_size,
+        layer_dims,
+        seed,
+    ):
         self.learning_rate = learning_rate
         self.num_epochs = num_epochs
         self.initialization = initialization
@@ -34,7 +40,9 @@ class deep_NN_model:
         if initialization == "xavier":
             self._initializer = tf.contrib.layers.xavier_initializer(seed=self.seed)
         elif initialization == "he":
-            self._initializer = tf.contrib.layers.variance_scaling_initializer(seed=self.seed)
+            self._initializer = tf.contrib.layers.variance_scaling_initializer(
+                seed=self.seed
+            )
 
     def create_placeholders(self, n_x, n_y):
         """
@@ -67,13 +75,16 @@ class deep_NN_model:
         L = len(self.layer_dims)
 
         for l in range(1, L):
-            self._parameters['W' + str(l)] = tf.get_variable(name="W"+str(l),
-                                                             shape=[self.layer_dims[l],
-                                                                    self.layer_dims[l-1]],
-                                                             initializer=self._initializer)
-            self._parameters['b' + str(l)] = tf.get_variable(name="b"+str(l),
-                                                             shape=[self.layer_dims[l], 1],
-                                                             initializer=tf.zeros_initializer())
+            self._parameters["W" + str(l)] = tf.get_variable(
+                name="W" + str(l),
+                shape=[self.layer_dims[l], self.layer_dims[l - 1]],
+                initializer=self._initializer,
+            )
+            self._parameters["b" + str(l)] = tf.get_variable(
+                name="b" + str(l),
+                shape=[self.layer_dims[l], 1],
+                initializer=tf.zeros_initializer(),
+            )
 
     def forward_propagation(self):
         """
@@ -94,12 +105,15 @@ class deep_NN_model:
         # From 1 to L-1 hidden layer
         for l in range(1, L):
             A_prev = A
-            Z = tf.add(tf.matmul(self._parameters['W' + str(l)],
-                                 A_prev), self._parameters['b' + str(l)])
+            Z = tf.add(
+                tf.matmul(self._parameters["W" + str(l)], A_prev),
+                self._parameters["b" + str(l)],
+            )
             A = tf.nn.relu(Z)
 
-        self._ZL = tf.add(tf.matmul(self._parameters['W' + str(L)], A),
-                          self._parameters['b' + str(L)])
+        self._ZL = tf.add(
+            tf.matmul(self._parameters["W" + str(L)], A), self._parameters["b" + str(L)]
+        )
 
     def compute_cost(self):
         """
@@ -120,8 +134,9 @@ class deep_NN_model:
         print("logits", logits.shape)
         print("labels", labels.shape)
 
-        cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits,
-                                                                      labels=labels))
+        cost = tf.reduce_mean(
+            tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=labels)
+        )
 
         return cost
 
@@ -145,12 +160,12 @@ class deep_NN_model:
 
         # to be able to rerun the model without overwriting tf variables
         ops.reset_default_graph()
-        tf.set_random_seed(1)          # to keep consistent results
+        tf.set_random_seed(1)  # to keep consistent results
 
         # (n_x: input size, m : number of examples in the train set)
         (n_x, m) = X_train.shape
-        n_y = Y_train.shape[0]         # n_y : output size
-        costs = []                     # To keep track of the cost
+        n_y = Y_train.shape[0]  # n_y : output size
+        costs = []  # To keep track of the cost
 
         # Create Placeholders of shape (n_x, n_y)
         self.create_placeholders(n_x, n_y)
@@ -165,7 +180,9 @@ class deep_NN_model:
         cost = self.compute_cost()
 
         # Backpropagation: Define the tensorflow optimizer. Use an AdamOptimizer.
-        optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(cost)
+        optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(
+            cost
+        )
 
         # Initialize all the variables
         init = tf.global_variables_initializer()
@@ -180,9 +197,11 @@ class deep_NN_model:
             for epoch in range(self.num_epochs):
                 epoch_cost = 0.0
                 # number of minibatches of size minibatch_size in the train set
-                num_minibatches = int(m/self.minibatch_size)
+                num_minibatches = int(m / self.minibatch_size)
                 self.seed = self.seed + 1
-                minibatches = random_mini_batches(X_train, Y_train, self.minibatch_size, self.seed)
+                minibatches = random_mini_batches(
+                    X_train, Y_train, self.minibatch_size, self.seed
+                )
 
                 for minibatch in minibatches:
 
@@ -190,11 +209,12 @@ class deep_NN_model:
                     (minibatch_X, minibatch_Y) = minibatch
 
                     # run the graph on a minibatch.
-                    _, minibatch_cost = sess.run([optimizer, cost],
-                                                 feed_dict={self._X: minibatch_X,
-                                                            self._Y: minibatch_Y})
+                    _, minibatch_cost = sess.run(
+                        [optimizer, cost],
+                        feed_dict={self._X: minibatch_X, self._Y: minibatch_Y},
+                    )
 
-                    epoch_cost += minibatch_cost/num_minibatches
+                    epoch_cost += minibatch_cost / num_minibatches
 
                 # Print the cost every epoch
                 if print_cost is True and epoch % 100 == 0:

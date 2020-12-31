@@ -19,5 +19,6 @@ class Callback:
 
     def __call__(self, cb_name):
         f = getattr(self, cb_name, None)
-        if f and f(): return True
+        if f and f():
+            return True
         return False

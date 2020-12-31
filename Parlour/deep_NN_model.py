@@ -4,14 +4,13 @@ from shared_lib.model_utils import random_mini_batches
 
 
 class deep_NN_model:
-
     def __init__(self):
 
         # model parameters default values
         self.learning_rate = 0.01
         self.num_epochs = 2500
-        self.initialization = 'xavier'
-        self.optimizer = 'gd'
+        self.initialization = "xavier"
+        self.optimizer = "gd"
         self.minibatch_size = 32
         self.beta1 = 0.9
         self.beta2 = 0.999
@@ -25,22 +24,34 @@ class deep_NN_model:
         # NN model block definition
         self._nn_model_blocks = None
 
-    def set_hyper_params(self, num_epochs, optimizer_params, learning_rate, minibatch_size,
-                         initialization, lambd, keep_prob, layer_dims, seed):
+    def set_hyper_params(
+        self,
+        num_epochs,
+        optimizer_params,
+        learning_rate,
+        minibatch_size,
+        initialization,
+        lambd,
+        keep_prob,
+        layer_dims,
+        seed,
+    ):
         self.learning_rate = learning_rate
         self.num_epochs = num_epochs
         self.minibatch_size = minibatch_size
         self.initialization = initialization
         self.seed = seed
-        self.optimizer = optimizer_params['optimizer']
+        self.optimizer = optimizer_params["optimizer"]
         if self.optimizer == "adam":
-            self.beta1 = optimizer_params['beta1']
-            self.beta2 = optimizer_params['beta2']
-            self.epsilon = optimizer_params['epsilon']
-        self._config = {"layer_dims": layer_dims,
-                        "seed": self.seed,
-                        "lambd": lambd,
-                        "keep_prob": keep_prob}
+            self.beta1 = optimizer_params["beta1"]
+            self.beta2 = optimizer_params["beta2"]
+            self.epsilon = optimizer_params["epsilon"]
+        self._config = {
+            "layer_dims": layer_dims,
+            "seed": self.seed,
+            "lambd": lambd,
+            "keep_prob": keep_prob,
+        }
 
     def L_layer_model(self, train_X, train_Y, print_cost=False):
         """
@@ -58,9 +69,9 @@ class deep_NN_model:
         m = train_X.shape[1]
 
         # Parameters initialization
-        if self.initialization == 'xavier':
+        if self.initialization == "xavier":
             self._nn_model_blocks.initialize_parameters_deep_xavier()
-        elif self.initialization == 'he':
+        elif self.initialization == "he":
             self._nn_model_blocks.initialize_parameters_deep_he()
 
         # Loop (gradient descent)
@@ -68,9 +79,10 @@ class deep_NN_model:
 
             # random minibatches: increment the seed to reshuffle differently
             # the dataset after each epoch
-            #self.seed = self.seed + 1
-            minibatches = random_mini_batches(train_X, train_Y,
-                                              self.minibatch_size, self.seed)
+            # self.seed = self.seed + 1
+            minibatches = random_mini_batches(
+                train_X, train_Y, self.minibatch_size, self.seed
+            )
             cost_total = 0
 
             for minibatch in minibatches:
@@ -79,23 +91,23 @@ class deep_NN_model:
                 (minibatch_X, minibatch_Y) = minibatch
 
                 # Forward propagation: [LINEAR -> RELU]*(L-1) -> LINEAR -> SIGMOID.
-                AL, caches, dropout_caches = self._nn_model_blocks.L_model_forward(minibatch_X)
+                AL, caches, dropout_caches = self._nn_model_blocks.L_model_forward(
+                    minibatch_X
+                )
 
                 # Compute cost
                 cost_total += self._nn_model_blocks.compute_cost(AL, minibatch_Y)
 
                 # Backward propagation
-                grads = self._nn_model_blocks.L_model_backward(AL,
-                                                               minibatch_Y,
-                                                               caches,
-                                                               dropout_caches)
+                grads = self._nn_model_blocks.L_model_backward(
+                    AL, minibatch_Y, caches, dropout_caches
+                )
 
                 # Update parameters.
-                self._nn_model_blocks.update_parameters(grads,
-                                                        self.learning_rate)
+                self._nn_model_blocks.update_parameters(grads, self.learning_rate)
 
             # Print the avg cost every 100 training example
-            cost_avg = cost_total/m
+            cost_avg = cost_total / m
             if print_cost and i % 100 == 0:
                 print("Cost after iteration {:d}: {:f}".format(i, cost_avg))
             if print_cost and i % 100 == 0:
@@ -116,9 +128,9 @@ class deep_NN_model:
         t = 0  # counter for adam update
 
         # Parameters initialization
-        if self.initialization == 'xavier':
+        if self.initialization == "xavier":
             self._nn_model_blocks.initialize_parameters_deep_xavier()
-        elif self.initialization == 'he':
+        elif self.initialization == "he":
             self._nn_model_blocks.initialize_parameters_deep_he()
 
         self._nn_model_blocks.initialize_adam()
@@ -129,8 +141,9 @@ class deep_NN_model:
             # random minibatches: increment the seed to reshuffle differently
             # the dataset after each epoch
             self.seed = self.seed + 1
-            minibatches = random_mini_batches(train_X, train_Y,
-                                              self.minibatch_size, self.seed)
+            minibatches = random_mini_batches(
+                train_X, train_Y, self.minibatch_size, self.seed
+            )
             cost_total = 0
 
             for minibatch in minibatches:
@@ -139,26 +152,24 @@ class deep_NN_model:
                 (minibatch_X, minibatch_Y) = minibatch
 
                 # Forward propagation: [LINEAR -> RELU]*(L-1) -> LINEAR -> SIGMOID.
-                AL, caches, dropout_caches = self._nn_model_blocks.L_model_forward(minibatch_X)
+                AL, caches, dropout_caches = self._nn_model_blocks.L_model_forward(
+                    minibatch_X
+                )
 
                 # Compute cost
                 cost_total += self._nn_model_blocks.compute_cost(AL, minibatch_Y)
 
                 # Backward propagation
-                grads = self._nn_model_blocks.L_model_backward(AL,
-                                                               minibatch_Y,
-                                                               caches,
-                                                               dropout_caches)
+                grads = self._nn_model_blocks.L_model_backward(
+                    AL, minibatch_Y, caches, dropout_caches
+                )
 
                 # Update parameters
                 t = t + 1  # Adam counter
-                self._nn_model_blocks.update_parameters_with_adam(grads,
-                                                                  t,
-                                                                  self.learning_rate,
-                                                                  self.beta1,
-                                                                  self.beta2,
-                                                                  self.epsilon)
-            cost_avg = cost_total/m
+                self._nn_model_blocks.update_parameters_with_adam(
+                    grads, t, self.learning_rate, self.beta1, self.beta2, self.epsilon
+                )
+            cost_avg = cost_total / m
 
             # Print the cost every 1000 epoch
             if print_cost and i % 1000 == 0:
@@ -196,7 +207,7 @@ class deep_NN_model:
                 p[0, i] = 0
 
         # print results
-        print("Accuracy: {}".format(str(np.sum((p == Y)/m))))
+        print("Accuracy: {}".format(str(np.sum((p == Y) / m))))
 
         return p
 

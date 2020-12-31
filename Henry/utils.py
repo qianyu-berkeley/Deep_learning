@@ -47,6 +47,7 @@ def camel2snake(name):
     s1 = re.sub(_camel_re1, r"\1_\2", name)
     return re.sub(_camel_re2, r"\1_\2", s1).lower()
 
+
 def listify(o):
     if o is None:
         return []

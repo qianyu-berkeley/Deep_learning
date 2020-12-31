@@ -9,6 +9,7 @@ log leverls
 - logger.critical("critical message")
 """
 
+
 class CustomFormatter(logging.Formatter):
     """Logging Formatter to add colors and count warning / errors"""
 
@@ -24,13 +25,14 @@ class CustomFormatter(logging.Formatter):
         logging.INFO: grey + format + reset,
         logging.WARNING: yellow + format + reset,
         logging.ERROR: red + format + reset,
-        logging.CRITICAL: bold_red + format + reset
+        logging.CRITICAL: bold_red + format + reset,
     }
 
     def format(self, record):
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
+
 
 def set_logger(log_path, log_level=logging.INFO):
     """Sets the logger to log info in terminal and file `log_path`.
@@ -60,7 +62,9 @@ def set_logger(log_path, log_level=logging.INFO):
     if not logger.handlers:
         # Logging to a file
         file_handler = logging.FileHandler(log_path)
-        file_handler.setFormatter(logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s'))
+        file_handler.setFormatter(
+            logging.Formatter("%(asctime)s : %(levelname)s : %(name)s : %(message)s")
+        )
         logger.addHandler(file_handler)
 
         # Logging to console

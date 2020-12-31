@@ -14,7 +14,7 @@ def sigmoid(Z):
     A -- output of sigmoid(z), same shape as Z
     cache -- returns Z as well, useful during backpropagation
     """
-    A = 1/(1+np.exp(-Z))
+    A = 1 / (1 + np.exp(-Z))
     cache = Z
 
     return A, cache
@@ -36,7 +36,7 @@ def relu(Z):
     """
     A = np.maximum(0, Z)
     cache = Z
-    assert(A.shape == Z.shape)
+    assert A.shape == Z.shape
 
     return A, cache
 
@@ -60,7 +60,7 @@ def relu_backward(dA, cache):
     dZ = np.array(dA, copy=True)
     # When z <= 0, you should set dz to 0 as well.
     dZ[Z <= 0] = 0
-    assert (dZ.shape == Z.shape)
+    assert dZ.shape == Z.shape
 
     return dZ
 
@@ -80,9 +80,9 @@ def sigmoid_backward(dA, cache):
     """
 
     Z = cache
-    s = 1/(1+np.exp(-Z))
-    dZ = dA * s * (1-s)
-    assert (dZ.shape == Z.shape)
+    s = 1 / (1 + np.exp(-Z))
+    dZ = dA * s * (1 - s)
+    assert dZ.shape == Z.shape
 
     return dZ
 
@@ -100,7 +100,7 @@ def image2vector(image):
     --------
     a vector of shape (length*height*depth, 1)
     """
-    v = image.reshape(image.shape[0]*image.shape[1]*image.shape[2], 1)
+    v = image.reshape(image.shape[0] * image.shape[1] * image.shape[2], 1)
     return v
 
 

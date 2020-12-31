@@ -1,8 +1,9 @@
 class Dataset:
-    """ Dataset class to abstract minibatch operation of a dataset 
-        - dataset is an iterator
-        - the Dataset object is used as an input to torch Dataloader class
+    """Dataset class to abstract minibatch operation of a dataset
+    - dataset is an iterator
+    - the Dataset object is used as an input to torch Dataloader class
     """
+
     def __init__(self, x, y):
         self.x, self.y = x, y
 
@@ -12,11 +13,13 @@ class Dataset:
     def __getitem__(self, i):
         return self.x[i], self.y[i]
 
+
 class DataBunch:
-    """ DataBunch class abstracts training and validation dataloader into a single class
-        - dataloader object as input
-        - pass number of training class
+    """DataBunch class abstracts training and validation dataloader into a single class
+    - dataloader object as input
+    - pass number of training class
     """
+
     def __init__(self, train_dl, valid_dl, c=None):
         self.train_dl, self.valid_dl, self.c = train_dl, valid_dl, c
 

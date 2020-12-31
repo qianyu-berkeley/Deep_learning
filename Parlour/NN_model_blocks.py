@@ -3,12 +3,15 @@ import Parlour.NN_utils as utils
 
 
 class NN_model_blocks:
-
     def __init__(self, config):
-        self.layer_dims = config['layer_dims']  # a list contains the dimension of hidden layers
-        self.seed = config['seed']  # random seeds for NN initialization for repeatable results
-        self.lambd = config['lambd']
-        self.keep_prob = config['keep_prob']
+        self.layer_dims = config[
+            "layer_dims"
+        ]  # a list contains the dimension of hidden layers
+        self.seed = config[
+            "seed"
+        ]  # random seeds for NN initialization for repeatable results
+        self.lambd = config["lambd"]
+        self.keep_prob = config["keep_prob"]
         self._parameters = {}
         self._v = {}
         self._s = {}
@@ -30,13 +33,16 @@ class NN_model_blocks:
         L = len(self.layer_dims)
 
         for l in range(1, L):
-            self._parameters['W' + str(l)] = np.random.randn(self.layer_dims[l],
-                                                             self.layer_dims[l-1])/np.sqrt(self.layer_dims[l-1])
-            self._parameters['b' + str(l)] = np.zeros((self.layer_dims[l], 1))
+            self._parameters["W" + str(l)] = np.random.randn(
+                self.layer_dims[l], self.layer_dims[l - 1]
+            ) / np.sqrt(self.layer_dims[l - 1])
+            self._parameters["b" + str(l)] = np.zeros((self.layer_dims[l], 1))
 
-            assert(self._parameters['W' + str(l)].shape ==
-                   (self.layer_dims[l], self.layer_dims[l-1]))
-            assert(self._parameters['b' + str(l)].shape == (self.layer_dims[l], 1))
+            assert self._parameters["W" + str(l)].shape == (
+                self.layer_dims[l],
+                self.layer_dims[l - 1],
+            )
+            assert self._parameters["b" + str(l)].shape == (self.layer_dims[l], 1)
 
     def initialize_parameters_deep_he(self):
         """
@@ -55,13 +61,16 @@ class NN_model_blocks:
         L = len(self.layer_dims)
 
         for l in range(1, L):
-            self._parameters['W' + str(l)] = np.random.randn(self.layer_dims[l],
-                                                             self.layer_dims[l-1])*np.sqrt(2.0/self.layer_dims[l-1])
-            self._parameters['b' + str(l)] = np.zeros((self.layer_dims[l], 1))
+            self._parameters["W" + str(l)] = np.random.randn(
+                self.layer_dims[l], self.layer_dims[l - 1]
+            ) * np.sqrt(2.0 / self.layer_dims[l - 1])
+            self._parameters["b" + str(l)] = np.zeros((self.layer_dims[l], 1))
 
-            assert(self._parameters['W' + str(l)].shape ==
-                   (self.layer_dims[l], self.layer_dims[l-1]))
-            assert(self._parameters['b' + str(l)].shape == (self.layer_dims[l], 1))
+            assert self._parameters["W" + str(l)].shape == (
+                self.layer_dims[l],
+                self.layer_dims[l - 1],
+            )
+            assert self._parameters["b" + str(l)].shape == (self.layer_dims[l], 1)
 
     def linear_forward(self, A, W, b):
         """
@@ -81,7 +90,7 @@ class NN_model_blocks:
         """
 
         Z = W.dot(A) + b
-        assert(Z.shape == (W.shape[0], A.shape[1]))
+        assert Z.shape == (W.shape[0], A.shape[1])
 
         cache = (A, W, b)
 
@@ -107,7 +116,7 @@ class NN_model_blocks:
         if activation == "sigmoid":  # output layer
             Z, linear_cache = self.linear_forward(A_prev, W, b)
             A, activation_cache = utils.sigmoid(Z)
-            assert (A.shape == (W.shape[0], A_prev.shape[1]))
+            assert A.shape == (W.shape[0], A_prev.shape[1])
             dropout_cache = np.ones(A.shape)
             cache = (linear_cache, activation_cache)
             return A, cache
@@ -115,7 +124,7 @@ class NN_model_blocks:
         elif activation == "relu":  # hidden layer
             Z, linear_cache = self.linear_forward(A_prev, W, b)
             A, activation_cache = utils.relu(Z)
-            assert (A.shape == (W.shape[0], A_prev.shape[1]))
+            assert A.shape == (W.shape[0], A_prev.shape[1])
 
             # append dropout prob and parameters with dropout to the cache
             AD, dropout_cache = utils.invert_dropout(A, self.keep_prob)
@@ -142,21 +151,25 @@ class NN_model_blocks:
         # Implement [LINEAR -> RELU]*(L-1). Add "cache" to the "caches" list.
         for l in range(1, L):
             A_prev = A
-            A, cache, dropout_cache = self.linear_activation_forward(A_prev,
-                                                                     self._parameters['W' + str(l)],
-                                                                     self._parameters['b' + str(l)],
-                                                                     activation="relu")
+            A, cache, dropout_cache = self.linear_activation_forward(
+                A_prev,
+                self._parameters["W" + str(l)],
+                self._parameters["b" + str(l)],
+                activation="relu",
+            )
             caches.append(cache)
             dropout_caches.append(dropout_cache)
 
         # Implement LINEAR -> SIGMOID. Add "cache" to the "caches" list.
-        AL, cache = self.linear_activation_forward(A,
-                                                   self._parameters['W' + str(L)],
-                                                   self._parameters['b' + str(L)],
-                                                   activation="sigmoid")
+        AL, cache = self.linear_activation_forward(
+            A,
+            self._parameters["W" + str(L)],
+            self._parameters["b" + str(L)],
+            activation="sigmoid",
+        )
 
         caches.append(cache)
-        assert(AL.shape == (1, X.shape[1]))
+        assert AL.shape == (1, X.shape[1])
 
         return AL, caches, dropout_caches
 
@@ -184,11 +197,14 @@ class NN_model_blocks:
 
         # L2 Regularization Cost
         # For minibatch, we do not divided by total sample size
-        L2_regularization_cost = sum([np.sum(np.square(w))
-                                      for w in self._parameters.values()])*self.lambd/2
+        L2_regularization_cost = (
+            sum([np.sum(np.square(w)) for w in self._parameters.values()])
+            * self.lambd
+            / 2
+        )
 
         cost = cost_minibatch_total + L2_regularization_cost
-        assert(cost.shape == ())
+        assert cost.shape == ()
 
         return cost
 
@@ -210,13 +226,13 @@ class NN_model_blocks:
         A_prev, W, b = cache
         m = A_prev.shape[1]
 
-        dW = 1./m * np.dot(dZ, A_prev.T) + (self.lambd/m)*W
-        db = 1./m * np.sum(dZ, axis=1, keepdims=True)
+        dW = 1.0 / m * np.dot(dZ, A_prev.T) + (self.lambd / m) * W
+        db = 1.0 / m * np.sum(dZ, axis=1, keepdims=True)
         dA_prev = np.dot(W.T, dZ)
 
-        assert (dA_prev.shape == A_prev.shape)
-        assert (dW.shape == W.shape)
-        assert (db.shape == b.shape)
+        assert dA_prev.shape == A_prev.shape
+        assert dW.shape == W.shape
+        assert db.shape == b.shape
 
         return dA_prev, dW, db
 
@@ -284,13 +300,18 @@ class NN_model_blocks:
         # Lth layer (SIGMOID -> LINEAR) gradients.
         # Inputs: "dAL, current_cache, None".
         # Outputs: "grads["dAL-1"], grads["dWL"], grads["dbL"]
-        current_cache = caches[L-1]
-        current_dropout_cache = dropout_caches[L-2]
-        grads["dA" + str(L-1)], grads["dW" + str(L)], grads["db" + str(L)] = \
-            self.linear_activation_backward(dAL, current_cache, current_dropout_cache, 'sigmoid')
+        current_cache = caches[L - 1]
+        current_dropout_cache = dropout_caches[L - 2]
+        (
+            grads["dA" + str(L - 1)],
+            grads["dW" + str(L)],
+            grads["db" + str(L)],
+        ) = self.linear_activation_backward(
+            dAL, current_cache, current_dropout_cache, "sigmoid"
+        )
 
         # Loop from l=L-2 to l=0
-        for l in reversed(range(L-1)):
+        for l in reversed(range(L - 1)):
             # lth layer: (RELU -> LINEAR) gradients.
             # Inputs: "grads["dA" + str(l + 1)], current_cache, dropout_cache".
             # Outputs: "grads["dA" + str(l)] , grads["dW" + str(l + 1)] , grads["db" + str(l + 1)]
@@ -301,10 +322,9 @@ class NN_model_blocks:
             else:
                 current_dropout_cache = dropout_caches[l - 1]
 
-            dA_prev_temp, dW_temp, db_temp = self.linear_activation_backward(grads['dA' + str(l+1)],
-                                                                             current_cache,
-                                                                             current_dropout_cache,
-                                                                             'relu')
+            dA_prev_temp, dW_temp, db_temp = self.linear_activation_backward(
+                grads["dA" + str(l + 1)], current_cache, current_dropout_cache, "relu"
+            )
             grads["dA" + str(l)] = dA_prev_temp
             grads["dW" + str(l + 1)] = dW_temp
             grads["db" + str(l + 1)] = db_temp
@@ -324,15 +344,19 @@ class NN_model_blocks:
         grads -- python dictionary containing your gradients, output of L_model_backward
         """
 
-        L = len(self._parameters)//2  # number of layers in the neural network
+        L = len(self._parameters) // 2  # number of layers in the neural network
 
         # Update rule for each parameter. Use a for loop.
         for l in range(L):
 
-            self._parameters["W"+str(l+1)] = self._parameters["W"+str(l+1)] - \
-                learning_rate*grads["dW"+str(l+1)]
-            self._parameters["b"+str(l+1)] = self._parameters["b"+str(l+1)] - \
-                learning_rate*grads["db"+str(l+1)]
+            self._parameters["W" + str(l + 1)] = (
+                self._parameters["W" + str(l + 1)]
+                - learning_rate * grads["dW" + str(l + 1)]
+            )
+            self._parameters["b" + str(l + 1)] = (
+                self._parameters["b" + str(l + 1)]
+                - learning_rate * grads["db" + str(l + 1)]
+            )
 
     def initialize_adam(self):
         """
@@ -355,17 +379,26 @@ class NN_model_blocks:
 
         """
 
-        L = len(self._parameters)//2  # number of layers in the neural networks
+        L = len(self._parameters) // 2  # number of layers in the neural networks
 
         # Initialize v, s. Input: "parameters". Outputs: "v, s".
         for l in range(L):
-            self._v["dW" + str(l+1)] = np.zeros(self._parameters['W' + str(l+1)].shape)
-            self._v["db" + str(l+1)] = np.zeros(self._parameters['b' + str(l+1)].shape)
-            self._s["dW" + str(l+1)] = np.zeros(self._parameters['W' + str(l+1)].shape)
-            self._s["db" + str(l+1)] = np.zeros(self._parameters['b' + str(l+1)].shape)
+            self._v["dW" + str(l + 1)] = np.zeros(
+                self._parameters["W" + str(l + 1)].shape
+            )
+            self._v["db" + str(l + 1)] = np.zeros(
+                self._parameters["b" + str(l + 1)].shape
+            )
+            self._s["dW" + str(l + 1)] = np.zeros(
+                self._parameters["W" + str(l + 1)].shape
+            )
+            self._s["db" + str(l + 1)] = np.zeros(
+                self._parameters["b" + str(l + 1)].shape
+            )
 
-    def update_parameters_with_adam(self, grads, t, learning_rate,
-                                    beta1, beta2, epsilon):
+    def update_parameters_with_adam(
+        self, grads, t, learning_rate, beta1, beta2, epsilon
+    ):
         """
         Update parameters using Adam
 
@@ -388,34 +421,54 @@ class NN_model_blocks:
         s -- Adam variable, moving average of the squared gradient, python dictionary
         """
 
-        L = len(self._parameters)//2                 # number of layers in the neural networks
-        v_corrected = {}                         # Initializing first moment estimate, python dictionary
-        s_corrected = {}                         # Initializing second moment estimate, python dictionary
+        L = len(self._parameters) // 2  # number of layers in the neural networks
+        v_corrected = {}  # Initializing first moment estimate, python dictionary
+        s_corrected = {}  # Initializing second moment estimate, python dictionary
 
         # Perform Adam update on all parameters
         for l in range(L):
             # Moving average of the gradients. Inputs: "v, grads, beta1". Output: "v".
-            self._v["dW" + str(l+1)] = beta1*self._v['dW' + str(l+1)] + \
-                (1-beta1)*grads['dW' + str(l+1)]
-            self._v["db" + str(l+1)] = beta1*self._v['db' + str(l+1)] + \
-                (1-beta1)*grads['db' + str(l+1)]
+            self._v["dW" + str(l + 1)] = (
+                beta1 * self._v["dW" + str(l + 1)]
+                + (1 - beta1) * grads["dW" + str(l + 1)]
+            )
+            self._v["db" + str(l + 1)] = (
+                beta1 * self._v["db" + str(l + 1)]
+                + (1 - beta1) * grads["db" + str(l + 1)]
+            )
 
             # Compute bias-corrected first moment estimate. Inputs: "v, beta1, t". Output: "v_corrected".
-            v_corrected["dW" + str(l+1)] = self._v['dW' + str(l+1)] / (1 - beta1**t)
-            v_corrected["db" + str(l+1)] = self._v['db' + str(l+1)] / (1 - beta1**t)
+            v_corrected["dW" + str(l + 1)] = self._v["dW" + str(l + 1)] / (
+                1 - beta1 ** t
+            )
+            v_corrected["db" + str(l + 1)] = self._v["db" + str(l + 1)] / (
+                1 - beta1 ** t
+            )
 
             # Moving average of the squared gradients. Inputs: "s, grads, beta2". Output: "s".
-            self._s["dW" + str(l+1)] = beta2*self._s['dW' + str(l+1)] + \
-                (1-beta2)*np.square(grads['dW' + str(l+1)])
-            self._s["db" + str(l+1)] = beta2*self._s['db' + str(l+1)] + \
-                (1-beta2)*np.square(grads['db' + str(l+1)])
+            self._s["dW" + str(l + 1)] = beta2 * self._s["dW" + str(l + 1)] + (
+                1 - beta2
+            ) * np.square(grads["dW" + str(l + 1)])
+            self._s["db" + str(l + 1)] = beta2 * self._s["db" + str(l + 1)] + (
+                1 - beta2
+            ) * np.square(grads["db" + str(l + 1)])
 
             # Compute bias-corrected second raw moment estimate. Inputs: "s, beta2, t". Output: "s_corrected".
-            s_corrected["dW" + str(l+1)] = self._s['dW' + str(l+1)] / (1 - beta2**t)
-            s_corrected["db" + str(l+1)] = self._s['db' + str(l+1)] / (1 - beta2**t)
+            s_corrected["dW" + str(l + 1)] = self._s["dW" + str(l + 1)] / (
+                1 - beta2 ** t
+            )
+            s_corrected["db" + str(l + 1)] = self._s["db" + str(l + 1)] / (
+                1 - beta2 ** t
+            )
 
             # Update parameters. Inputs: "parameters, learning_rate, v_corrected, s_corrected, epsilon". Output: "parameters".
-            self._parameters["W" + str(l+1)] = self._parameters['W' + str(l+1)] - learning_rate * \
-                v_corrected['dW' + str(l+1)]/(np.sqrt(s_corrected['dW' + str(l+1)])+epsilon)
-            self._parameters["b" + str(l+1)] = self._parameters['b' + str(l+1)] - learning_rate * \
-                v_corrected['db' + str(l+1)]/(np.sqrt(s_corrected['db' + str(l+1)])+epsilon)
+            self._parameters["W" + str(l + 1)] = self._parameters[
+                "W" + str(l + 1)
+            ] - learning_rate * v_corrected["dW" + str(l + 1)] / (
+                np.sqrt(s_corrected["dW" + str(l + 1)]) + epsilon
+            )
+            self._parameters["b" + str(l + 1)] = self._parameters[
+                "b" + str(l + 1)
+            ] - learning_rate * v_corrected["db" + str(l + 1)] / (
+                np.sqrt(s_corrected["db" + str(l + 1)]) + epsilon
+            )

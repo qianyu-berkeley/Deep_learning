@@ -28,32 +28,44 @@ def load_image_data(path_train, path_test, color_scale):
     test_x_flatten = test_x_orig.reshape(test_x_orig.shape[0], -1).T
 
     # Standardize data to have feature values between 0 and 1.
-    train_x = train_x_flatten/color_scale
-    test_x = test_x_flatten/color_scale
+    train_x = train_x_flatten / color_scale
+    test_x = test_x_flatten / color_scale
 
     train_y = train_y_orig.reshape((1, train_y_orig.shape[0]))
     test_y = test_y_orig.reshape((1, test_y_orig.shape[0]))
 
-    image_data_status(train_x_orig, test_x_orig,
-                      train_y_orig, test_y_orig,
-                      train_x, test_x,
-                      train_y, test_y)
+    image_data_status(
+        train_x_orig,
+        test_x_orig,
+        train_y_orig,
+        test_y_orig,
+        train_x,
+        test_x,
+        train_y,
+        test_y,
+    )
 
     # create a dictionary of data sets
     data_dict = {}
-    data_dict['train_x'] = train_x
-    data_dict['train_y'] = train_y
-    data_dict['test_x'] = test_x
-    data_dict['test_y'] = test_y
-    data_dict['classes'] = classes
+    data_dict["train_x"] = train_x
+    data_dict["train_y"] = train_y
+    data_dict["test_x"] = test_x
+    data_dict["test_y"] = test_y
+    data_dict["classes"] = classes
 
     return data_dict
 
 
-def image_data_status(train_x_orig, test_x_orig,
-                      train_y_orig, test_y_orig,
-                      train_x, test_x,
-                      train_y, test_y):
+def image_data_status(
+    train_x_orig,
+    test_x_orig,
+    train_y_orig,
+    test_y_orig,
+    train_x,
+    test_x,
+    train_y,
+    test_y,
+):
 
     m_train = train_x_orig.shape[0]
     num_px = train_x_orig.shape[1]
@@ -85,17 +97,19 @@ def load_planar_dataset(sample_size, dimensionality, seed, randomness):
     np.random.seed(seed)
 
     m = sample_size  # number of examples
-    N = int(m/2)  # number of points per class
+    N = int(m / 2)  # number of points per class
     D = dimensionality  # dimensionality
     X = np.zeros((m, D))  # data matrix where each row is a single example
-    Y = np.zeros((m, 1), dtype='uint8')  # labels vector (0 for red, 1 for blue)
+    Y = np.zeros((m, 1), dtype="uint8")  # labels vector (0 for red, 1 for blue)
     a = 4  # maximum ray of the flower
 
     for j in range(2):
-        ix = range(N*j, N*(j+1))
-        t = np.linspace(j*3.12, (j+1)*3.12, N) + np.random.randn(N)*randomness  # theta
-        r = a*np.sin(4*t) + np.random.randn(N)*randomness  # radius
-        X[ix] = np.c_[r*np.sin(t), r*np.cos(t)]
+        ix = range(N * j, N * (j + 1))
+        t = (
+            np.linspace(j * 3.12, (j + 1) * 3.12, N) + np.random.randn(N) * randomness
+        )  # theta
+        r = a * np.sin(4 * t) + np.random.randn(N) * randomness  # radius
+        X[ix] = np.c_[r * np.sin(t), r * np.cos(t)]
         Y[ix] = j
 
     X = X.T
@@ -124,10 +138,10 @@ def load_2D_dataset(file):
 
 
 def data_2D_status(data_dict):
-    train_x_shape = data_dict['train_x'].shape
-    train_y_shape = data_dict['train_y'].shape
-    test_x_shape = data_dict['test_x'].shape
-    test_y_shape = data_dict['test_y'].shape
+    train_x_shape = data_dict["train_x"].shape
+    train_y_shape = data_dict["train_y"].shape
+    test_x_shape = data_dict["test_x"].shape
+    test_y_shape = data_dict["test_y"].shape
 
     print("2D Data Shape")
     print("-------------------")
