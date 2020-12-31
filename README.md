@@ -1,16 +1,13 @@
 # Deep_learning_toolbox
 
 ## description
-A set of Deep Learning Projects I built while I am taking the Deep Learning Lectures from Prof Andrew Ng. This is for my learning and exploring deep learning algorithms and architectures.
+A set of Deep Learning Python Module when I am surveying the Deep Learning Lectures from Prof. Andrew Ng and FastAI.
 
-## Projects
-* Parlour - A Deep Neural Network flow built from scratch with Numpy
-
-
+## Module
+* Parlour - A NN flow built using Numpy (Prof. Andrew Ng NN Lecture)
 
 
-
-__Ever wonder how I come up with the naming for the project?__
+## Module Names
 
 [The Invincibles](https://genius.com/Arsenal-fc-arsenal-2003-04-invincibles-squad-annotated)
 :-)
