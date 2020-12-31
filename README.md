@@ -1,10 +1,12 @@
 # Deep_learning_toolbox
 
 ## description
-A set of Deep Learning Python Module when I am surveying the Deep Learning Lectures from Prof. Andrew Ng and FastAI.
+A set of Deep Learning Modules based on the Deep Learning Lectures of Prof. Andrew Ng and Jeremy Howard's FastAI.
 
 ## Module
-* Parlour - A NN flow built using Numpy (Prof. Andrew Ng NN Lecture)
+* Parlour - A NN module built using Numpy only
+* Henry - A NN module using pytorch
+* Vieira - A NN module using tensorflow
 
 
 ## Module Names
