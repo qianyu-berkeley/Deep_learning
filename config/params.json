@@ -1,5 +1,6 @@
 {
     "learning_rate": 0.3,
     "batch_size": 32,
-    "epoches": 10
+    "epoches": 10,
+    "data_type": "image"
 }
